@@ -31,5 +31,6 @@ def generate_pharmacophore_models(smiles_list, output_dir):
     return pharmacophore_models
 
 def convert_ligand_to_pdbqt(ligand_path, output_path):
-    command = f'obabel {ligand_path} -O {output_path} -h'
+    flags = '--minimize --steps 1500 --sd'
+    command = f'obabel {ligand_path} -O {output_path} -h {flags}'
     subprocess.run(command, shell=True)

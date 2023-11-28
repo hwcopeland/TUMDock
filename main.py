@@ -5,7 +5,7 @@ import sys
 from utils.protein_utils import *
 from utils.ligand_utils import *
 from utils.docking_utils import *
-from utils.rcsb_utils import create_directories, download_protein, query_rcsb
+from utils.rcsb_utils import create_directories, download_protein
 
 
 # Get the directory of the current script
@@ -13,8 +13,6 @@ script_dir = os.path.dirname(os.path.realpath(__file__))
 # Working directory
 os.chdir(script_dir)
 
-# User input for protein
-protein = input("Please enter the protein name: ")
 # Define directories
 dirs = [f"{script_dir}/Ligands/PDB", f"{script_dir}/Ligands/PDBQT", f"{script_dir}/Ligands/Ions", "Protein", "Results"]
 
@@ -23,12 +21,11 @@ create_directories(dirs)
 
 # Download protein
 protein = input("Please enter the protein RCSB code: ")
-download_similar_ligands = input("Do you want to download similar ligands? (y/n): ").lower() == "y"
-download_protein(protein, download_similar_ligands)
+download_protein(protein)
 
 # Process protein
 parser = PDBParser()
-structure = parser.get_structure(protein, f"./Protein/{protein}.pdb")
+structure = parser.get_structure(protein, f"{script_dir}/Protein/{protein}.pdb")
 remove_metals_and_ions(structure)
 ligand_residues = get_ligand_residues(structure)
 write_ligands_to_files(ligand_residues, f'{script_dir}/Ligands/PDB', f'{script_dir}/Ligands/Ions', metals_and_ions)

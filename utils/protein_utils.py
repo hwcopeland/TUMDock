@@ -1,12 +1,11 @@
 # protein_utils.py
-
+import subprocess
 import os
 import shutil
 from Bio.PDB import PDBList, PDBParser, PDBIO, Structure, Model, Chain
 
 metals_and_ions = ['NA', 'MG', 'K', 'CA', 'MN', 'FE', 'CO', 'NI', 'CU', 'ZN', 'MO', 'CD', 'W', 'AU', 'HG', 'CL', 'BR', 'F', 'I', 'SO4', 'PO4', 'NO3', 'CO3']
 standard_aa = ['ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLU', 'GLN', 'GLY', 'HIS', 'ILE', 'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL']
-water_residues = 'HOH'
 
 def create_directories(dirs):
     for dir_name in dirs:
@@ -46,15 +45,22 @@ def write_ligands_to_files(ligand_residues, output_dir, metals_and_ions_dir, met
         else:
             io.save(os.path.join(output_dir, filename))
 
+def get_water_residues(structure):
+    water_residues = []
+    for model in structure:
+        for chain in model:
+            water_residues.extend((chain, res.get_id()) for res in chain if res.get_resname() == "HOH")
+    return water_residues
+
+
 def clean_protein_structure(structure, ligand_residues, water_residues):
     for chain, ligand in ligand_residues:
         chain.detach_child(ligand.id)
-    print(water_residues)
     for chain, res_id in water_residues:
         chain.detach_child(res_id)
     io = PDBIO()
     io.set_structure(structure)
-    io.save(f"{protein}_clean.pdb")
+    io.save(f"{structure}_clean.pdb")
 
 def convert_pdb_to_pdbqt(protein):
     flags = '--minimize --steps 1500 --sd'

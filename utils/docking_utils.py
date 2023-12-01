@@ -1,5 +1,5 @@
 # docking_utils.py
-
+import os
 import subprocess
 
 def run_fpocket(protein):

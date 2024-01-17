@@ -3,6 +3,7 @@ import subprocess
 import os
 import shutil
 from Bio.PDB import PDBList, PDBParser, PDBIO, Structure, Model, Chain
+from rdkit.Chem import rdmolfiles, AllChem
 
 metals_and_ions = ['NA', 'MG', 'K', 'CA', 'MN', 'FE', 'CO', 'NI', 'CU', 'ZN', 'MO', 'CD', 'W', 'AU', 'HG', 'CL', 'BR', 'F', 'I', 'SO4', 'PO4', 'NO3', 'CO3']
 standard_aa = ['ALA', 'ARG', 'ASN', 'ASP', 'CYS', 'GLU', 'GLN', 'GLY', 'HIS', 'ILE', 'LEU', 'LYS', 'MET', 'PHE', 'PRO', 'SER', 'THR', 'TRP', 'TYR', 'VAL']
@@ -53,16 +54,15 @@ def get_water_residues(structure):
     return water_residues
 
 
-def clean_protein_structure(structure, ligand_residues, water_residues):
+def clean_protein_structure(structure, ligand_residues, water_residues, protein):
     for chain, ligand in ligand_residues:
         chain.detach_child(ligand.id)
     for chain, res_id in water_residues:
         chain.detach_child(res_id)
     io = PDBIO()
     io.set_structure(structure)
-    io.save(f"{structure}_clean.pdb")
+    io.save(f"{protein}_clean.pdb")
 
-def convert_pdb_to_pdbqt(protein):
-    flags = '--minimize --steps 1500 --sd'
-    command = f'obabel {protein}_clean.pdb -O {protein}_clean.pdbqt {flags}'
-    subprocess.run(command, shell=True)
+def prepare_receptor(protein):
+    os.system(f"prepare_receptor -r {protein}_clean.pdb -o {protein}_clean.pdbqt -v -A hydrogens")
+    

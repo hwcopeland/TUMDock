@@ -30,27 +30,27 @@ create_directories(dirs)
 # Download protein
 protein = input("Please enter the protein RCSB code: ")
 download_protein(protein)
-# Process protein
+### Process protein ###
 parser = PDBParser()
+# Assuming that the protien name is the same as the RCSB code, we strip the protien stucture from the PDB file.
 structure = parser.get_structure(protein, f"{script_dir}/Protein/{protein}.pdb")
 remove_metals_and_ions(structure)
 ligand_residues = get_ligand_residues(structure)
 write_ligands_to_files(ligand_residues, f'{script_dir}/Ligands/PDB', f'{script_dir}/Ligands/Ions', metals_and_ions)
 water_residues = get_water_residues(structure)
-clean_protein_structure(structure, ligand_residues, water_residues)
-convert_pdb_to_pdbqt(protein)
+clean_protein_structure(structure, ligand_residues, water_residues, protein)
+prepare_receptor(protein)
 # Process ligands
 smiles_list = pdb_to_smiles(script_dir)
 pharmacophore_models = generate_pharmacophore_models(smiles_list, f'{script_dir}/Ligands/Pharmacophores/')
 ligand_dir = f'{script_dir}/Ligands/PDB/'
 ligand_files = [os.path.join(ligand_dir, file) for file in os.listdir(ligand_dir) if file.endswith('.pdb')]
+
 for ligand in ligand_files:
     ligand_p = f"{ligand}"
     output_path = f"{script_dir}/Ligands/PDBQT/{os.path.basename(ligand)[:-4]}.pdbqt"
     convert_ligand_to_pdbqt(ligand_p, output_path)
-
 ## Docking
-
 if input("Would you like to view the pockets? (y/n): ") == "y":
     run_fpocket(protein)
     time.sleep(10)
@@ -74,7 +74,7 @@ if input("Would you like to use a custom box size? (y/n): ") == "y":
 if input("Would you like to use a custom number of modes? (y/n): ") == "y":
     num_modes = input("Please enter the number of modes: ")
 
-receptor_path = f"{script_dir}/Protein/{protein}_rigid.pdbqt"
+receptor_path = f"{script_dir}/Protein/{protein}_clean.pdbqt"
 ligand_dir = f'{script_dir}/Ligands/PDBQT/'
 ligand_files = [os.path.join(ligand_dir, file) for file in os.listdir(ligand_dir) if file.endswith('.pdbqt')]
 for ligand in ligand_files:
